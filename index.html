@@ -1,0 +1,95 @@
+<!-- Project on Chat bot-->
+<!-- Made by Megha (220030800074), Nancy (220030800081), Sakshi (220030800105) and Priya (220030800097)-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> Infosphere | Chat bot for everyone </title>
+    <!-- Liking google fonts-->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- App Header -->
+        <header class="app heading">
+            <div class="logo">
+                <img id="icon" src="icon.png" alt="">
+            </div>
+            <div class="heading">
+                <h1 class="heading-1">Welcome to Infosphere</h1>
+                <h4 class="heading-2">How can I help you today?</h4>
+            </div>
+        </header>
+        <!-- Suggestions list-->
+        <ul class="list">
+            <li class="list-item">
+                <p class="text"> What is current date and time? </p>
+                <span class="material-symbols-outlined">
+                    calendar_month
+                </span>
+            </li>
+            <li class="list-item">
+                <p class="text"> How can I level up my web development expertize in 2025? </p>
+                <span class="material-symbols-outlined">
+                    lightbulb
+                </span>
+            </li>
+            <li class="list-item">
+                <p class="text"> Suggest some useful tools for debugging JavaScipt code. </p>
+                <span class="material-symbols-outlined">
+                    draw
+                </span>
+            </li>
+            <li class="list-item">
+                <p class="text"> Create a React Js component for simple to-do list app. </p>
+                <span class="material-symbols-outlined">
+                    code_blocks
+                </span>
+            </li>
+        </ul>
+
+        <!--chats container-->
+        <div class="chat-box">
+        </div>
+        <!-- Prompt Container-->
+        <div class="prompt">
+            <div class="prompt-content">
+                <form action="#" class="prompt-form">
+                    <input type="text" placeholder="Ask Infosphere" class="prompt-input" required>
+                    <div class="prompt-actions">
+                        <!-- file upload container-->
+                        <div class="file-upload-container">
+                            <img src="#" class="file-preview">
+                            <input  type="file" accept="image/*,.pdf,.txt,.csv" id="file-input" hidden>
+                            <button type="button" class="file-icon material-symbols-outlined"> description </button>
+                            <button id="add-file-btn" type="button" class="material-symbols-outlined"> attach_file
+                            </button>
+                            <button id="cancel-file-btn" type="button" class="material-symbols-outlined">close </button>
+                        </div>
+
+                        <button type="button" id="stop-response-btn" class="material-symbols-outlined"> stop_circle
+                        </button>
+                        <button id="send-prompt-btn" class="material-symbols-outlined"> arrow_upward </button>
+                    </div>
+                </form>
+                <button id="voice-btn" class="material-symbols-outlined" title="Voice Search">mic</button>
+                <button id="toggle-btn" class="material-symbols-outlined">light_mode</button>
+                <button id="delete-btn" class="material-symbols-outlined">delete</button>
+            </div>
+            <p class="disclaimer-text">
+                This Chat Bot may display inaccurate info, including about people, so double-check its responses.
+            </p>
+        </div>
+    </div>
+
+    <script src="script.js"> </script>
+</body>
+
+</html>
