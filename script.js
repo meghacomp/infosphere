@@ -60,6 +60,33 @@ const generateResponse= async(botMsgDiv) =>{
     parts: [{ text: userData.message }, ...(userData.file.data ? [{ inline_data: (({ fileName, isImage, ...rest }) => rest)(userData.file) }] : [])],
   });
     try{
+
+         // Check if the user is asking about the model introduction
+         const introQueryPattern = /^(who are you\??|what are you\??|who created you\??|tell me about yourself\??|who developed you\??|how you were developed\??)$/i;
+         if (introQueryPattern.test(userData.message)) {
+             const introductionText = `Hello! My name is Infosphere. I am an AI Model developed by Megha, Nancy, Priya and Sakshi. I can assist you with various tasks, answer questions, and have conversations. Feel free to ask me anything!`;
+             typingEffect(introductionText, textElement, botMsgDiv);
+             chatHistory.push({ role: "model", parts: [{ text: introductionText }] });
+             return;
+         }
+
+         // Check if the user is asking about the model 
+         const developQueryPattern = /^(when were you created\??|when was your birthday\??|your creation\??|when were you developed\??|when were you born\??)$/i;
+         if (developQueryPattern.test(userData.message)) {
+             const DevelopText = `I was developed in April 2025.`;
+             typingEffect(DevelopText, textElement, botMsgDiv);
+             chatHistory.push({ role: "model", parts: [{ text: DevelopText }] });
+             return;
+         }
+
+        // Check if the user is asking about the working 
+         const WorkQueryPattern = /^(what is your work\??|what you can do\??|what can you perform\??|what you do\??|how you work\??|when were you born\??)$/i;
+         if (WorkQueryPattern.test(userData.message)) {
+             const WorkText = `I was developed in April 2025.`;
+             typingEffect(WorkText, textElement, botMsgDiv);
+             chatHistory.push({ role: "model", parts: [{ text: WorkText }] });
+             return;
+         }
         //send the chat history to the API to get a response
         const response =await fetch(API_URL, {
                 method:"POST",
@@ -87,46 +114,75 @@ userData.file = {};
 };
 
 //handle form submission 
-const handleFormSubmit = (e) => {
+const handleFormSubmit = async (e) => {
     e.preventDefault();
     const userMessage = promptInput.value.trim();
     if (!userMessage || document.body.classList.contains("bot-responding")) return;
     userData.message = userMessage;
 
     promptInput.value = "";
-    document.body.classList.add("bot-responding","chats-active");
+    document.body.classList.add("bot-responding", "chats-active");
     fileUploadContainer.classList.remove("file-attached", "img-attached", "active");
 
-    // Generate user message HTML with optional file attachment
-  const userMsgHTML = `
-  <p class="message-text"></p>
-  ${userData.file.data ? (userData.file.isImage ? `<img src="data:${userData.file.mime_type};base64,${userData.file.data}" class="img-attachment" />` : `<p class="file-attachment"><span class="material-symbols-outlined">description</span>${userData.file.fileName}</p>`) : ""}
-  `;
-    const userMsgDiv= createMsgElement(userMsgHTML,"message-user");
-    userMsgDiv.querySelector(".message-text").textContent=userMessage;
+    const userMsgHTML = `
+      <p class="message-text"></p>
+      ${userData.file.data ? (userData.file.isImage ? `<img src="data:${userData.file.mime_type};base64,${userData.file.data}" class="img-attachment" />` : `<p class="file-attachment"><span class="material-symbols-outlined">description</span>${userData.file.fileName}</p>`) : ""}
+    `;
+    const userMsgDiv = createMsgElement(userMsgHTML, "message-user");
+    userMsgDiv.querySelector(".message-text").textContent = userMessage;
     chatsContainer.appendChild(userMsgDiv);
     scrollToBottom();
 
-    setTimeout(() => {
-        // Generate bot message HTML and add in the chats container after 600ms
+    setTimeout(async () => {
         const botMsgHTML = '<img src="icon.png" alt="" class="avatar"> <p class="message-text"> Just a Sec....</p>';
         const botMsgDiv = createMsgElement(botMsgHTML, "message-bot", "loading");
         chatsContainer.appendChild(botMsgDiv);
         scrollToBottom();
 
-        // Check if user asked for date and time
-        if (userMessage.toLowerCase().includes("time") || userMessage.toLowerCase().includes("date")) {
-            const currentDateTime = new Date().toLocaleString();  // Get the current date and time
+        const isDateTimeQuery = /^(what\s+is\s+)?(the\s+)?(current\s+)?(date|time|date\s+and\s+time)(\s+now)?\??$/i.test(userMessage.trim());
+        if (isDateTimeQuery) {
+            const currentDateTime = new Date().toLocaleString();
             const responseText = `Current date and time: ${currentDateTime}`;
             typingEffect(responseText, botMsgDiv.querySelector(".message-text"), botMsgDiv);
             chatHistory.push({ role: "model", parts: [{ text: responseText }] });
-        } else {
-            // Generate normal bot response via API if not asking for date/time
-            generateResponse(botMsgDiv);
+            return;
         }
-    }, 600);
 
-}
+        // Check if it's a weather-related question
+        const weatherMatch = userMessage.match(/(?:temperature|weather) in ([a-zA-Z\s]+)/i);
+        if (weatherMatch) {
+            const city = weatherMatch[1].trim();
+            const apiKey = 'c098db7a9b6aa3310c463d4bccf243e4'; // Replace with your actual key
+            const weatherURL = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
+
+            try {
+                const res = await fetch(weatherURL);
+                const data = await res.json();
+                if (res.ok) {
+                    const temp = data.main.temp;
+                    const weatherDescription = data.weather[0].description;
+                    const responseText = `The weather in ${city} is ${weatherDescription}, with a temperature of ${temp}°C.`;
+                    
+                    typingEffect(responseText, botMsgDiv.querySelector(".message-text"), botMsgDiv);
+                    chatHistory.push({ role: "model", parts: [{ text: responseText }] });
+                    return;
+                } else {
+                    throw new Error(`No weather data found for "${city}".`);
+                }
+            } catch (err) {
+                const errorText = err.message || "Failed to fetch weather.";
+                typingEffect(errorText, botMsgDiv.querySelector(".message-text"), botMsgDiv);
+                chatHistory.push({ role: "model", parts: [{ text: errorText }] });
+                return;
+            }
+        }
+       
+        
+        // Otherwise, use API
+        generateResponse(botMsgDiv);
+    }, 600);
+};
+
 
 // Handle file input change (file upload)
 fileInput.addEventListener("change",() => {
@@ -241,3 +297,7 @@ if (SpeechRecognition) {
     voiceBtn.disabled = true;
     voiceBtn.title = "Voice search not supported";
 }
+
+
+
+
