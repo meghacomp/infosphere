@@ -12,11 +12,36 @@ const themeToggle=document.querySelector("#toggle-btn");
 const API_KEY = "AIzaSyAuB_YKzs0TOVUWlAaaDGIS2pcQo8uGqFA"; // Your API key here
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
+
+
 let typingInterval,controller;
 const chatHistory=[];
 const userData= {message: "", file: {} };
 
 
+// GNews API Integration for Latest India News
+const fetchIndiaNews = async () => {
+    const GNEWS_API_KEY = "516ff6342f46cdff54fcdf620673ea09"; //GNews key
+    const url = `https://gnews.io/api/v4/top-headlines?country=in&lang=en&max=5&token=${GNEWS_API_KEY}`;
+  
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+  
+      if (!data.articles || data.articles.length === 0) {
+        return "🗞️ No recent Indian news found in the last 24 hours.";
+      }
+  
+      const newsList = data.articles
+        .map(article => `📰 ${article.title}<br><a href="${article.url}" target="_blank">${article.source.name}</a>`)
+        .join("<br><br>");
+  
+      return `🗞️ <b>Latest News from India (last 24 hrs):</b><br><br>${newsList}`;
+    } catch (error) {
+      return "❌ Failed to fetch Indian news.";
+    }
+  };
+  
 //function to create message elemnts 
 const createMsgElement =  (content,...classes)=>
 {
@@ -62,7 +87,7 @@ const generateResponse= async(botMsgDiv) =>{
     try{
 
          // Check if the user is asking about the model introduction
-         const introQueryPattern = /^(who are you\??|what are you\??|who created you\??|tell me about yourself\??|who developed you\??|how you were developed\??)$/i;
+         const introQueryPattern = /^(who are you\??|what are you\??|who created you\??|who are u\??|tell me about yourself\??|who developed you\??|how you were developed\??)$/i;
          if (introQueryPattern.test(userData.message)) {
              const introductionText = `Hello! My name is Infosphere. I am an AI Model developed by Megha, Nancy, Priya and Sakshi. I can assist you with various tasks, answer questions, and have conversations. Feel free to ask me anything!`;
              typingEffect(introductionText, textElement, botMsgDiv);
@@ -148,11 +173,12 @@ const handleFormSubmit = async (e) => {
             return;
         }
 
+   
         // Check if it's a weather-related question
         const weatherMatch = userMessage.match(/(?:temperature|weather) in ([a-zA-Z\s]+)/i);
         if (weatherMatch) {
             const city = weatherMatch[1].trim();
-            const apiKey = 'c098db7a9b6aa3310c463d4bccf243e4'; // Replace with your actual key
+            const apiKey = 'c098db7a9b6aa3310c463d4bccf243e4'; // weather key
             const weatherURL = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric`;
 
             try {
@@ -176,8 +202,24 @@ const handleFormSubmit = async (e) => {
                 return;
             }
         }
-       
-        
+        // Check if user asks for any of the common news patterns
+const newsPattern = /\b(latest\s+news|news\s+updates|latest\s+updates|updates|breaking\s+news|india\s+breaking\s+news|india\s+news|india\s+updates)\b/i;
+
+if (newsPattern.test(userMessage.trim())) {
+  const newsText = await fetchIndiaNews();
+
+  botMsgDiv.classList.remove("loading");
+  document.body.classList.remove("bot-responding");
+
+  const textElement = botMsgDiv.querySelector(".message-text");
+  textElement.innerHTML = newsText; // Show formatted HTML with links and text
+  chatHistory.push({ role: "model", parts: [{ text: newsText }] });
+
+  scrollToBottom();
+  return;
+}
+
+
         // Otherwise, use API
         generateResponse(botMsgDiv);
     }, 600);
@@ -297,7 +339,6 @@ if (SpeechRecognition) {
     voiceBtn.disabled = true;
     voiceBtn.title = "Voice search not supported";
 }
-
 
 
 
