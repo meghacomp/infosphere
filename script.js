@@ -163,7 +163,28 @@ const handleFormSubmit = async (e) => {
         const botMsgDiv = createMsgElement(botMsgHTML, "message-bot", "loading");
         chatsContainer.appendChild(botMsgDiv);
         scrollToBottom();
-
+        
+        // Simple website request pattern
+        const simpleWebsitePattern = /(?:open|visit|go to|give (?:me )?link to)\s+([a-z0-9\-]+)/i;
+        const match = userMessage.match(simpleWebsitePattern);
+        
+        if (match) {
+            let siteName = match[1].toLowerCase();
+            let url = `https://www.${siteName}.com`;
+        
+            const responseText = `Here's the link to <b>${siteName}</b>: <a href="${url}" target="_blank">${url}</a>`;
+            const textElement = botMsgDiv.querySelector(".message-text");
+        
+            botMsgDiv.classList.remove("loading");
+            document.body.classList.remove("bot-responding");
+        
+            textElement.innerHTML = responseText;
+            chatHistory.push({ role: "model", parts: [{ text: responseText }] });
+            scrollToBottom();
+            return;
+        }
+        
+        
         const isDateTimeQuery = /^(what\s+is\s+)?(the\s+)?(current\s+)?(date|time|date\s+and\s+time)(\s+now)?\??$/i.test(userMessage.trim());
         if (isDateTimeQuery) {
             const currentDateTime = new Date().toLocaleString();
@@ -202,7 +223,7 @@ const handleFormSubmit = async (e) => {
                 return;
             }
         }
-        // Check if user asks for any of the common news patterns
+// Check if user asks for any of the common news patterns
 const newsPattern = /\b(latest\s+news|news\s+updates|latest\s+updates|updates|breaking\s+news|india\s+breaking\s+news|india\s+news|india\s+updates)\b/i;
 
 if (newsPattern.test(userMessage.trim())) {
@@ -219,9 +240,8 @@ if (newsPattern.test(userMessage.trim())) {
   return;
 }
 
-
-        // Otherwise, use API
-        generateResponse(botMsgDiv);
+// Otherwise, use API
+    generateResponse(botMsgDiv);
     }, 600);
 };
 
@@ -339,6 +359,8 @@ if (SpeechRecognition) {
     voiceBtn.disabled = true;
     voiceBtn.title = "Voice search not supported";
 }
+
+
 
 
 
